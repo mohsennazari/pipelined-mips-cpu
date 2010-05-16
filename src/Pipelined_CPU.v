@@ -30,11 +30,14 @@ module SingleCycle_CPU(
 input   clk, rst_n;
 
 // Wire/Reg declaration
-// =========Write your code from here. Good luck!==========
-wire RegDST, Branch, MemRead, MemtoReg, MemWrite, ALUSrc, RegWrite, Zero, Branch_Zero;
+wire RegDST, Branch, MemRead, MemtoReg, MemWrite, ALUSrc, RegWrite, Zero, Branch_Zero, 
+	 // --> Pipelined CPU
+	 IF_IDWrite, Flush;
 wire [2:0] ALUOp, ALUCtrl;
 wire [4:0] mux_RegDST;
-wire [31:0] mux_ALUSrc, mux_Branch, mux_MemtoReg, Instr, pc, PC_4, Rs_Data, Rt_Data, Immediate, Offset, PC_Offset, ALUResult, MemData;
+wire [31:0] mux_ALUSrc, mux_Branch, mux_MemtoReg, Instr, pc, PC_4, Rs_Data, Rt_Data, Immediate, Offset, PC_Offset, ALUResult, MemData,
+			// --> Pipelined CPU
+			PC_4_ID;
 
 assign Offset = Immediate << 2;
 assign Branch_Zero = Branch & Zero;
@@ -58,6 +61,17 @@ Adder PC_Add_4(
 Instr_Memory Instr_Memory(
     .addr       (pc), 
     .instr      (Instr)
+);
+
+IF_ID IF_ID(
+	.clk		(clk),
+	.rst		(rst_n),
+	.PC_4_in	(PC_4),
+	.instr_in	(),
+	.hazard_in	(IF_IDWrite),
+	.flush_in	(Flush),
+	.PC_4_out	(PC_4_ID),
+	.instr_out	(),
 );
 
 
