@@ -35,7 +35,7 @@ reg		[31:0]	PC_4_out;
 reg		[31:0]	instr_out;
 
 // Procedure
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk or negedge rst) begin
 	// Stage2 Data <= 0
 	// ----------------
 	if (~rst_n) begin
@@ -55,8 +55,8 @@ always @(posedge clk or negedge rst_n) begin
 				instr_out <= 32b'0;
 			end
 			else begin
-				PC_4_out <= PC_4_out;
-				instr_out <= instr_out;
+				PC_4_out <= PC_4_in;
+				instr_out <= instr_in;
 			end
 		end
 	end
