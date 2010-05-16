@@ -32,12 +32,16 @@ input   clk, rst_n;
 // Wire/Reg declaration
 wire RegDST, Branch, MemRead, MemtoReg, MemWrite, ALUSrc, RegWrite, Zero, Branch_Zero, 
 	 // --> Pipelined CPU
-	 IF_IDWrite, Flush;
+	 IF_IDWrite, Flush, RegWrite_EX;
 wire [2:0] ALUOp, ALUCtrl;
-wire [4:0] mux_RegDST;
+wire [4:0] mux_RegDST,
+			// --> Pipelined CPU
+			RS_to_FW, RT_to_FW, RT_to_mux_5bit_ID_EX, RD_to_mux_5bit_ID_EX;
+// --> Pipelined CPU
+wire [7:0] mux_8bit_ID_EX_out;
 wire [31:0] mux_ALUSrc, mux_Branch, mux_MemtoReg, Instr, pc, PC_4, Rs_Data, Rt_Data, Immediate, Offset, PC_Offset, ALUResult, MemData,
 			// --> Pipelined CPU
-			PC_4_ID;
+			PC_4_ID, Rs_Data_EX, Rt_Data_EX, Immediate_EX;
 
 assign Offset = Immediate << 2;
 assign Branch_Zero = Branch & Zero;
@@ -72,8 +76,57 @@ IF_ID IF_ID(
 	.flush_in	(Flush),
 	.PC_4_out	(PC_4_ID),
 	.instr_out	(),
+	// TODO: Fill above.
 );
 
+ID_EX ID_EX(
+	.clk				(clk),
+	.rst				(rst_n),
+	.RegWrite_in		(mux_8bit_ID_EX_out[7]),		// WB
+	.MemtoReg_in		(mux_8bit_ID_EX_out[6]),		// WB
+	.MemRead_in			(mux_8bit_ID_EX_out[5]),		// M
+	.MemWrite_in		(mux_8bit_ID_EX_out[4]),		// M
+	.ALUSrc_in			(mux_8bit_ID_EX_out[3]),		// EX
+	.ALUOp_in			(mux_8bit_ID_EX_out[2:1]),		// EX
+	.RegDst_in			(mux_8bit_ID_EX_out[0]),		// EX
+	.RegRsData_in		(Rs_Data),
+	.RegRtData_in		(Rt_Data),
+	.Immediate_in		(Immediate),
+	.instr_Rs_addr_in 	(Instr[25:21]),
+	.instr_Rt_addr_a_in (Instr[20:16]),
+	.instr_Rt_addr_b_in (Instr[20:16]),
+	.instr_Rd_addr_in	(Instr[15:11]),
+	.RegWrite_out		(RegWrite_EX),		// WB
+	.MemtoReg_out		(MemtoReg_EX),		// WB
+	.MemRead_out		(MemRead_EX),		// M
+	.MemWrite_out		(MemWrite_EX),		// M
+	.ALUSrc_out			(ALUSrc),			// EX
+	.ALUOp_out			(ALUOp),			// EX
+	.RegDst_out			(RegDST),			// EX
+	.RegRsData_out		(Rs_Data_EX),
+	.RegRtData_out		(Rt_Data_EX),
+	.Immediate_out		(Immediate_EX),
+	.instr_Rs_addr_out	(RS_to_FW),
+	.instr_Rt_addr_a_out(RT_to_FW),
+	.instr_Rt_addr_b_out(RT_to_mux_5bit_ID_EX),
+	.instr_Rd_addr_out	(RD_to_mux_5bit_ID_EX)
+);
+
+MUX_8bit mux_8bit_ID_EX(
+	.data1_in	(),
+	.data2_in	(8'b0),
+	.select_in	(),
+	.data_out	(mux_8bit_ID_EX_out),
+	// TODO: Fill the above. 
+	// Possibly we need a control signal for one of the data_in.
+);
+
+MUX_5bit mux_5bit_ID_EX(
+    .data1_in	(RT_to_mux_5bit_ID_EX),
+    .data2_in	(RD_to_mux_5bit_ID_EX),
+    .select_in	(RegDST),
+    .data_out	(mux_ID_EX_out)
+);
 
 Control Control(
     .opcode     (Instr[31:26]),
