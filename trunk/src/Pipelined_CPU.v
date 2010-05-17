@@ -34,16 +34,19 @@ wire RegDST, Branch, MemRead, MemtoReg, MemWrite, ALUSrc, RegWrite, Zero, Branch
 	 // --> Pipelined CPU
 	 IF_IDWrite, Flush, 
 	 RegWrite_EX, MemtoReg_EX, MemRead_EX, MemWrite_EX,
-	 RegWrite_MEM, MemtoReg_MEM, MemRead_MEM, MemWrite_MEM;
+	 RegWrite_MEM, MemtoReg_MEM, MemRead_MEM, MemWrite_MEM,
+	 RegWrite_WB, MemtoReg_WB, ;
 wire [2:0] ALUOp, ALUCtrl;
 wire [4:0] mux_RegDST,
 			// --> Pipelined CPU
-			RS_to_FW, RT_to_FW, RT_to_mux_5bit_ID_EX, RD_to_mux_5bit_ID_EX, mux_5bit_ID_EX_out, Rd_addr_MEM;
+			RS_to_FW, RT_to_FW, RT_to_mux_5bit_ID_EX, RD_to_mux_5bit_ID_EX, mux_5bit_ID_EX_out, Rd_addr_MEM, Rd_addr_WB;
 // --> Pipelined CPU
 wire [7:0] mux_8bit_ID_EX_out;
 wire [31:0] mux_ALUSrc, mux_Branch, mux_MemtoReg, Instr, pc, PC_4, Rs_Data, Rt_Data, Immediate, Offset, PC_Offset, ALUResult, MemData,
 			// --> Pipelined CPU
-			PC_4_ID, Rs_Data_EX, Rt_Data_EX, Immediate_EX, mux_32bit_EX_MEM_out, ALUResult_MEM, MemWriteData_MEM;
+			PC_4_ID, Rs_Data_EX, Rt_Data_EX, Immediate_EX, 
+			mux_32bit_EX_MEM_out, ALUResult_MEM, MemWriteData_MEM,
+			MemData_WB, ALUResult_WB;
 
 assign Offset = Immediate << 2;
 assign Branch_Zero = Branch & Zero;
@@ -147,6 +150,21 @@ EX_MEM EX_MEM(
 	.ALUData_out	(ALUResult_MEM),
 	.MemWriteData_out	(MemWriteData_MEM),
 	.WBregister_out		(Rd_addr_MEM)
+);
+
+MEM_WB MEM_WB(
+	.clk			(clk),
+	.rst			(rst_n),
+	.RegWrite_in	(RegWrite_MEM),	// WB
+	.MemtoReg_in	(MemtoReg_MEM),	// WB
+	.MemData_in		(MemData),
+	.ALUData_in		(ALUResult_MEM),
+	.WBregister_in	(Rd_addr_MEM),
+	.RegWrite_out	(RegWrite_WB),	// WB
+	.MemtoReg_out	(MemtoReg_WB),	// WB
+	.MemData_out	(MemData_WB),
+	.ALUData_out	(ALUResult_WB),
+	.WBregister_out	(Rd_addr_WB)
 );
 
 Control Control(

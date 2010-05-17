@@ -1,4 +1,15 @@
-﻿module EX_MEM(
+﻿/* =============================================================================
+ *
+ * Name           : EX_MEM.v
+ * Author         : Hakki Caner Kirmizi
+ * Date           : 2010-5-17
+ * Description    : A module that implements the so-called EX-MEM (execute -
+ *					memory access) pipelined register.
+ *
+ * =============================================================================
+*/
+
+module EX_MEM(
 	clk,
 	rst,
 	RegWrite_in,	// WB
