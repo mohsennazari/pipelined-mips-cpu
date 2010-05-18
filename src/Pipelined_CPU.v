@@ -177,7 +177,7 @@ MUX_5bit MUX_RegDst(
 );
 
 MUX_2x32bit MUX_ALUSrc(
-    .data0_in   (Rt_Data_EX),
+    .data0_in   (muxB_ALUsrc),
     .data1_in   (Immediate_EX),
     .select     (ALUSrc_EX),
     .data_out   (mux_ALUSrc)
@@ -192,7 +192,7 @@ MUX_3x32bit MUX_A(
 );
 
 MUX_3x32bit MUX_B(    
-    .data0_in	(mux_ALUSrc),
+    .data0_in	(Rt_Data_EX),
     .data1_in	(mux_MemtoReg),
     .data2_in	(ALUResult_MEM),
     .select		(ForwardB),
@@ -207,7 +207,7 @@ ALU_Control ALU_Control(
   
 ALU ALU(
     .data1_in   (muxA_ALUsrc),
-    .data2_in   (muxB_ALUsrc),
+    .data2_in   (mux_ALUSrc),
     .ALUCtrl    (ALUCtrl),
     .data       (ALUResult_EX),
     .Zero       (Zero)
@@ -221,7 +221,7 @@ EX_MEM EX_MEM(
 	.MemRead_in			(MemRead_EX),		// M
 	.MemWrite_in		(MemWrite_EX),	// M
 	.ALUData_in			(ALUResult_EX),
-	.MemWriteData_in	(Rt_Data_EX),
+	.MemWriteData_in	(muxB_ALUsrc),
 	.WBregister_in		(mux_RegDST_EX),
 	.RegWrite_out		(RegWrite_MEM),	// WB
 	.MemtoReg_out		(MemtoReg_MEM),	// WB
@@ -291,9 +291,12 @@ Hazard_Detection Hazard_Detection(
     .IFIDRegRt		(Instr_ID[20:16]),
     .IDEXRegRt		(Instr_EX[20:16]),
     .IDEXMemRead	(MemRead_EX),
+    .IDEXRegDST (mux_RegDST_EX),
+    .Branch (Ctrl_Code[8]),
     .PCWrite		(PCWrite),
     .IFIDWrite		(IFIDWrite),
     .Stall			(Stall)
+
 );
 
 endmodule
