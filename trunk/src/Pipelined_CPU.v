@@ -43,7 +43,7 @@ wire [31:0] PC_4_IF, PC_Offset, mux_Branch, pc, Instr_IF, PC_4_ID, Instr_ID, Rs_
             Offset, mux_MemtoReg, Immediate_ID, Immediate_EX, Instr_EX,
             mux_ALUSrc, Rs_Data_EX, Rt_Data_EX, ALUResult_MEM, muxA_ALUsrc, muxB_ALUsrc, ALUResult_EX,
 	    Rt_Data_MEM, MemData_MEM, MemData_WB, ALUResult_WB;
-assign Offset = Immediate_EX << 2;
+assign Offset = Immediate_ID << 2;
 assign Branch_Zero = Branch & Branch_Taken;
   
 // IF: Instruction fetch
@@ -119,7 +119,7 @@ Register_File Register_File(
     .Rt_addr    (Instr_ID[20:16]),
     .Rd_addr    (mux_RegDST_WB), 
     .Rd_data    (mux_MemtoReg),
-    .RegWrite   (RegWrite_ID), 
+    .RegWrite   (RegWrite_WB), 
     .Rs_data    (Rs_Data_ID), 
     .Rt_data    (Rt_Data_ID) 
 );

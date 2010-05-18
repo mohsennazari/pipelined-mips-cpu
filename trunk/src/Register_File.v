@@ -32,7 +32,7 @@ assign  Rs_data = (Rs_addr == 5'b0) ? 32'b0 : register[Rs_addr];
 assign  Rt_data = (Rt_addr == 5'b0) ? 32'b0 : register[Rt_addr];
 
 // Write Data   
-always @(posedge clk)
+always @(negedge clk)
 begin
     if(RegWrite)
         register[Rd_addr] <= Rd_data;
