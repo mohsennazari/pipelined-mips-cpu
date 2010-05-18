@@ -3,7 +3,7 @@ module Hazard_Detection(
     IFIDRegRt,
     IDEXRegRt,
     IDEXMemRead,
-    PCWrite
+    PCWrite,
     IFIDWrite,
     Stall,
 );

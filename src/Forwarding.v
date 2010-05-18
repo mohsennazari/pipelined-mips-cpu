@@ -24,9 +24,9 @@ else
     ForwardA <= 2'b00;
 
 if (ExMemRegWrite && (ExMemRegRd != 0) && (ExMemRegRd == IdExRegRt))
-    ForwardB <= 2'b01;
-else if (MemWbRegWrite && (MemWbRegRd != 0) && (MemWbRegRd == IdExRegRt))
     ForwardB <= 2'b10;
+else if (MemWbRegWrite && (MemWbRegRd != 0) && (MemWbRegRd == IdExRegRt))
+    ForwardB <= 2'b01;
 else
     ForwardB <= 2'b00;
 
