@@ -22,7 +22,7 @@ integer     i, outfile, counter;
 
 always #(`CYCLE_TIME/2) clk = ~clk;    
 
-SingleCycle_CPU CPU(
+Pipelined_CPU CPU(
     .clk  (clk),
     .rst_n  (rst_n)
 );

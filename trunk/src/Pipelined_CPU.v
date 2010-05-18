@@ -31,12 +31,18 @@ input   clk, rst_n;
 
 // Wire/Reg declaration
 wire        Branch_Zero, PCWrite, IFIDWrite,
-            Stall, RegDST_ID, Branch, MemRead_ID, MemtoReg_ID, MemWrite_ID, ALUSrc_ID, RegWrite_ID, Branch_Taken;
-wire [2:0]  ALUOp_ID;
-wire [4:0]  mux_RegDST_WB;
+            Stall, RegDST_ID, Branch, MemRead_ID, MemtoReg_ID, MemWrite_ID, ALUSrc_ID, RegWrite_ID, Branch_Taken, 
+            RegWrite_EX, MemtoReg_EX, MemRead_EX, MemWrite_EX, ALUSrc_EX, RegDST_EX, Zero, 
+	    RegWrite_MEM, MemtoReg_MEM, MemRead_MEM, MemWrite_MEM,
+	    RegWrite_WB, MemtoReg_WB;
+wire [1:0]  ForwardA, ForwardB;
+wire [2:0]  ALUOp_ID, ALUOp_EX, ALUCtrl;
+wire [4:0]  mux_RegDST_EX, mux_RegDST_WB, mux_RegDST_MEM;
 wire [9:0]  Ctrl_Code;
 wire [31:0] PC_4_IF, PC_Offset, mux_Branch, pc, Instr_IF, PC_4_ID, Instr_ID, Rs_Data_ID, Rt_Data_ID,
-            Offset, mux_MemtoReg, Immediate_ID, Immediate_EX, Instr_EX;
+            Offset, mux_MemtoReg, Immediate_ID, Immediate_EX, Instr_EX,
+            mux_ALUSrc, Rs_Data_EX, Rt_Data_EX, ALUResult_MEM, muxA_ALUsrc, muxB_ALUsrc, ALUResult_EX,
+	    Rt_Data_MEM, MemData_MEM, MemData_WB, ALUResult_WB;
 assign Offset = Immediate_EX << 2;
 assign Branch_Zero = Branch & Branch_Taken;
   
@@ -100,8 +106,8 @@ Control Control(
 );
 
 MUX_10bit Control_Stall(
-	.data1_in	(Ctrl_Code),
-	.data2_in	(10'b0),
+	.data1_in	(10'b0),
+	.data2_in	(Ctrl_Code),
 	.select_in	(Stall),
 	.data_out	({RegDST_ID, Branch, MemRead_ID, MemtoReg_ID, ALUOp_ID, MemWrite_ID,
 					ALUSrc_ID, RegWrite_ID})
@@ -178,19 +184,19 @@ MUX_2x32bit MUX_ALUSrc(
 );
 
 MUX_3x32bit MUX_A(    
-    data0_in	(Rs_Data_EX),
-    data1_in	(mux_MemtoReg),
-    data2_in	(ALUResult_MEM),
-    select		(ForwardA),
-    data_out	(muxA_ALUsrc)
+    .data0_in	(Rs_Data_EX),
+    .data1_in	(mux_MemtoReg),
+    .data2_in	(ALUResult_MEM),
+    .select		(ForwardA),
+    .data_out	(muxA_ALUsrc)
 );
 
 MUX_3x32bit MUX_B(    
-    data0_in	(mux_ALUSrc),
-    data1_in	(mux_MemtoReg),
-    data2_in	(ALUResult_MEM),
-    select		(ForwardB),
-    data_out	(muxB_ALUsrc)
+    .data0_in	(mux_ALUSrc),
+    .data1_in	(mux_MemtoReg),
+    .data2_in	(ALUResult_MEM),
+    .select		(ForwardB),
+    .data_out	(muxB_ALUsrc)
 );
 
 ALU_Control ALU_Control(
