@@ -7,7 +7,8 @@ module PC(
     clk,
     rst_n,
     pc_in,
-    pc_out
+    pc_out,
+    pcWrite
 );
 
 // Interface
@@ -25,7 +26,7 @@ begin
     begin
         pc_out <= 32'b0;
     end
-    else
+    else if (pcWrite)
     begin
         pc_out <= pc_in;
     end

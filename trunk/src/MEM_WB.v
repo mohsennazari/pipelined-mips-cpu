@@ -1,4 +1,4 @@
-﻿/* =============================================================================
+\u569c\ufffd* =============================================================================
  *
  * Name           : MEM_WB.v
  * Author         : Hakki Caner Kirmizi
@@ -10,18 +10,18 @@
 */
 
 module MEM_WB(
-	.clk,
-	.rst,
-	.RegWrite_in,	// WB
-	.MemtoReg_in,	// WB
-	.MemData_in,
-	.ALUData_in,
-	.WBregister_in,
-	.RegWrite_out,	// WB
-	.MemtoReg_out,	// WB
-	.MemData_out,
-	.ALUData_out,
-	.WBregister_out
+	clk,
+	rst,
+	RegWrite_in,	// WB
+	MemtoReg_in,	// WB
+	MemData_in,
+	ALUData_in,
+	WBregister_in,
+	RegWrite_out,	// WB
+	MemtoReg_out,	// WB
+	MemData_out,
+	ALUData_out,
+	WBregister_out
 );
 
 // Input Ports

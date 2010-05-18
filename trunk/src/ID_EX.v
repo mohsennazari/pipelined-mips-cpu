@@ -1,4 +1,4 @@
-﻿/* =============================================================================
+\u569c\ufffd* =============================================================================
  *
  * Name           : ID_EX.v
  * Author         : Hakki Caner Kirmizi
@@ -23,8 +23,7 @@ module ID_EX (
 	RegRtData_in,
 	Immediate_in,
 	instr_Rs_addr_in,
-	instr_Rt_addr_a_in,
-	instr_Rt_addr_b_in,
+	instr_Rt_addr_in,
 	instr_Rd_addr_in,
 	RegWrite_out,
 	MemtoReg_out,
@@ -37,8 +36,7 @@ module ID_EX (
 	RegRtData_out,
 	Immediate_out,
 	instr_Rs_addr_out,
-	instr_Rt_addr_a_out,
-	instr_Rt_addr_b_out,
+	instr_Rt_addr_out,
 	instr_Rd_addr_out
 );
 
@@ -56,8 +54,7 @@ input	[31:0]	RegRsData_in;
 input	[31:0]	RegRtData_in;
 input	[31:0]	Immediate_in;
 input	[4:0]	instr_Rs_addr_in;
-input	[4:0]	instr_Rt_addr_a_in;
-input	[4:0]	instr_Rt_addr_b_in;
+input	[4:0]	instr_Rt_addr_in;
 input	[4:0]	instr_Rd_addr_in;
 
 // Output Ports
@@ -72,8 +69,7 @@ output	[31:0]	RegRsData_out;
 output	[31:0]	RegRtData_out;
 output	[31:0]	Immediate_out;
 output	[4:0]	instr_Rs_addr_out;
-output	[4:0]	instr_Rt_addr_a_out;
-output	[4:0]	instr_Rt_addr_b_out;
+output	[4:0]	instr_Rt_addr_out;
 output	[4:0]	instr_Rd_addr_out;
 
 // Registers
@@ -90,8 +86,7 @@ reg	[31:0]	RegRsData_out;
 reg	[31:0]	RegRtData_out;
 reg	[31:0]	Immediate_out;
 reg	[4:0]	instr_Rs_addr_out;
-reg	[4:0]	instr_Rt_addr_a_out;
-reg	[4:0]	instr_Rt_addr_b_out;
+reg	[4:0]	instr_Rt_addr_out;
 reg	[4:0]	instr_Rd_addr_out;
 
 // Procedure
@@ -108,8 +103,7 @@ always @(posedge clk or negedge rst) begin
 		RegRtData_out	<= 32'b0;
 		Immediate_out	<= 32'b0;
 		instr_Rs_addr_out	<= 5'b0;
-		instr_Rt_addr_a_out	<= 5'b0;
-		instr_Rt_addr_b_out	<= 5'b0;
+		instr_Rt_addr_out	<= 5'b0;
 		instr_Rd_addr_out	<= 5'b0;
 	end
 	else begin
@@ -124,8 +118,7 @@ always @(posedge clk or negedge rst) begin
 		RegRtData_out	<= RegRtData_in;
 		Immediate_out	<= Immediate_in;
 		instr_Rs_addr_out	<= instr_Rs_addr_in;
-		instr_Rt_addr_a_out	<= instr_Rt_addr_a_in;
-		instr_Rt_addr_b_out	<= instr_Rt_addr_b_in;
+		instr_Rt_addr_out	<= instr_Rt_addr_in;
 		instr_Rd_addr_out	<= instr_Rd_addr_in;		
 	end
 end
