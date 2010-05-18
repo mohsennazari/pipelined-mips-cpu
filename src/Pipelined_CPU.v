@@ -30,17 +30,15 @@ module Pipelined_CPU(
 input   clk, rst_n;
 
 // Wire/Reg declaration
-wire Branch_ID, MemRead_ID, MemtoReg_ID, MemWrite_ID, ALUSrc_ID, RegWrite_ID, Zero, Branch_Zero,
-	 RegDST_ID, RegDST_EX
-wire [2:0] ALUOp_ID, ALUCtrl;
-wire [4:0] mux_RegDST;
-wire [31:0] mux_ALUSrc, mux_Branch, mux_MemtoReg, pc, Offset, PC_Offset, MemData,
-			PC_4_IF, PC_4_ID, PC_4_EX, Instr_IF, Instr_ID, Rs_Data_ID, Rs_Data_EX, 
-			Rt_Data_ID, Rt_Data_EX, Immediate_ID, Immediate_EX, PC_Offset_EX, PC_Offset_MEM,
-			ALUResult_EX, ALUResult_MEM
+wire        Branch_Zero, PCWrite, IFIDWrite,
+            Stall, RegDST_ID, Branch, MemRead_ID, MemtoReg_ID, MemWrite_ID, ALUSrc_ID, RegWrite_ID, Branch_Taken;
+wire [2:0]  ALUOp_ID;
+wire [4:0]  mux_RegDST_WB;
+wire [9:0]  Ctrl_Code;
+wire [31:0] PC_4_IF, PC_Offset, mux_Branch, pc, Instr_IF, PC_4_ID, Instr_ID, Rs_Data_ID, Rt_Data_ID,
+            Offset, mux_MemtoReg, Immediate_ID, Immediate_EX, Instr_EX;
 assign Offset = Immediate_EX << 2;
-assign Branch_Zero = Branch & Zero;
- 
+assign Branch_Zero = Branch & Branch_Taken;
   
 // IF: Instruction fetch
 
@@ -55,8 +53,8 @@ PC PC(
     .clk        (clk),
     .rst_n      (rst_n),
     .pc_in      (mux_Branch),
-    .pc_out     (pc)
-    .pcWrite	(PCWrite),
+    .pc_out     (pc),
+    .pcWrite	   (PCWrite)
 );
 
 Adder PC_Add_4(
@@ -76,9 +74,9 @@ IF_ID IF_ID(
 	.PC_4_in	(PC_4_IF),
 	.instr_in	(Instr_IF),
 	.hazard_in	(IFIDWrite),
-	.flush_in	(Branch_Taken),
+	.flush_in	(Branch_Zero),
 	.PC_4_out	(PC_4_ID),
-	.instr_out	(Instr_ID),
+	.instr_out	(Instr_ID)
 );
 
 // ID: Instruction decode
@@ -105,7 +103,7 @@ MUX_10bit Control_Stall(
 	.data1_in	(Ctrl_Code),
 	.data2_in	(10'b0),
 	.select_in	(Stall),
-	.data_out	({RegDST_ID, Branch_ID, MemRead_ID, MemtoReg_ID, ALUOp_ID, MemWrite_ID,
+	.data_out	({RegDST_ID, Branch, MemRead_ID, MemtoReg_ID, ALUOp_ID, MemWrite_ID,
 					ALUSrc_ID, RegWrite_ID})
 );
 
@@ -120,7 +118,7 @@ Register_File Register_File(
     .Rt_data    (Rt_Data_ID) 
 );
 
-Equal(
+Equal Equal(
     .input1		(Rs_Data_ID),
     .input2		(Rt_Data_ID),
     .result		(Branch_Taken)
@@ -276,7 +274,7 @@ Forwarding Forwarding(
     .MemWbRegWrite	(RegWrite_WB),
     .MemWbRegRd		(mux_RegDST_WB),
     .ForwardA		(ForwardA),	
-    .ForwardB		(ForwardB),
+    .ForwardB		(ForwardB)
 );
 
 
@@ -289,7 +287,7 @@ Hazard_Detection Hazard_Detection(
     .IDEXMemRead	(MemRead_EX),
     .PCWrite		(PCWrite),
     .IFIDWrite		(IFIDWrite),
-    .Stall			(Stall),
+    .Stall			(Stall)
 );
 
 endmodule

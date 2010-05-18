@@ -1,4 +1,4 @@
-\u569c\ufffd* =============================================================================
+/* =============================================================================
  *
  * Name           : ID_EX.v
  * Author         : Hakki Caner Kirmizi
@@ -73,8 +73,6 @@ output	[4:0]	instr_Rt_addr_out;
 output	[4:0]	instr_Rd_addr_out;
 
 // Registers
-reg			clk;
-reg			rst;
 reg			RegWrite_out;
 reg			MemtoReg_out;
 reg			MemRead_out;

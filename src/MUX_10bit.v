@@ -1,4 +1,4 @@
-﻿module MUX_10bit(
+module MUX_10bit(
 	data1_in,
 	data2_in,
 	select_in,

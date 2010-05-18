@@ -14,6 +14,7 @@ module PC(
 // Interface
 input           clk;
 input           rst_n;
+input           pcWrite;
 input   [31:0]  pc_in;
 output  [31:0]  pc_out;
 

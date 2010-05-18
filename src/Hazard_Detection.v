@@ -8,7 +8,7 @@ module Hazard_Detection(
     Stall,
 );
 
-input [4:0] IFIDRegRs, IFIDRegRt, IDExRegRt;
+input [4:0] IFIDRegRs, IFIDRegRt, IDEXRegRt;
 input IDEXMemRead;
 output PCWrite, IFIDWrite, Stall;
 
