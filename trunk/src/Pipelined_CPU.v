@@ -313,7 +313,8 @@ Hazard_Detection Hazard_Detection(
     .IDEXRegDST (mux_RegDST_EX),
     .Branch (Ctrl_Code[8]),
     .IDEXRegWrite (RegWrite_EX),
-    .Stall			(Stall)
+    .Stall			(Stall),
+    .clk (clk)
 );
 
 endmodule
