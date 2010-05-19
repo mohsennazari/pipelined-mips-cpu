@@ -35,13 +35,13 @@ wire        Branch_Zero, PCWrite, IFIDWrite,
             RegWrite_EX, MemtoReg_EX, MemRead_EX, MemWrite_EX, ALUSrc_EX, RegDST_EX, Zero, 
 	    RegWrite_MEM, MemtoReg_MEM, MemRead_MEM, MemWrite_MEM,
 	    RegWrite_WB, MemtoReg_WB;
-wire [1:0]  ForwardA, ForwardB;
+wire [1:0]  ForwardA_ALU, ForwardB_ALU, ForwardA_EQ, ForwardB_EQ;
 wire [2:0]  ALUOp_ID, ALUOp_EX, ALUCtrl;
 wire [4:0]  mux_RegDST_EX, mux_RegDST_WB, mux_RegDST_MEM;
 wire [9:0]  Ctrl_Code;
 wire [31:0] PC_4_IF, PC_Offset, mux_Branch, pc, Instr_IF, PC_4_ID, Instr_ID, Rs_Data_ID, Rt_Data_ID,
             Offset, mux_MemtoReg, Immediate_ID, Immediate_EX, Instr_EX,
-            mux_ALUSrc, Rs_Data_EX, Rt_Data_EX, ALUResult_MEM, muxA_ALUsrc, muxB_ALUsrc, ALUResult_EX,
+            mux_ALUSrc, Rs_Data_EX, Rt_Data_EX, ALUResult_MEM, muxA_ALUsrc, muxB_ALUsrc, ALUResult_EX, muxA_EQsrc, muxB_EQsrc,
 	    Rt_Data_MEM, MemData_MEM, MemData_WB, ALUResult_WB;
 assign Offset = Immediate_ID << 2;
 assign Branch_Zero = Branch & Branch_Taken;
@@ -60,7 +60,7 @@ PC PC(
     .rst_n      (rst_n),
     .pc_in      (mux_Branch),
     .pc_out     (pc),
-    .pcWrite	   (PCWrite)
+    .pcWrite	   (~Stall)
 );
 
 Adder PC_Add_4(
@@ -79,7 +79,7 @@ IF_ID IF_ID(
 	.rst		(rst_n),
 	.PC_4_in	(PC_4_IF),
 	.instr_in	(Instr_IF),
-	.hazard_in	(IFIDWrite),
+	.hazard_in	(~Stall),
 	.flush_in	(Branch_Zero),
 	.PC_4_out	(PC_4_ID),
 	.instr_out	(Instr_ID)
@@ -124,9 +124,25 @@ Register_File Register_File(
     .Rt_data    (Rt_Data_ID) 
 );
 
+MUX_3x32bit MUX_A_EQ(    
+    .data0_in	(Rs_Data_ID),
+    .data1_in	(mux_MemtoReg),
+    .data2_in	(ALUResult_MEM),
+    .select		(ForwardA_ALU),
+    .data_out	(muxA_EQsrc)
+);
+
+MUX_3x32bit MUX_B_EQ(    
+    .data0_in	(Rt_Data_ID),
+    .data1_in	(mux_MemtoReg),
+    .data2_in	(ALUResult_MEM),
+    .select		(ForwardB_ALU),
+    .data_out	(muxB_EQsrc)
+);
+
 Equal Equal(
-    .input1		(Rs_Data_ID),
-    .input2		(Rt_Data_ID),
+    .input1		(muxA_EQsrc),
+    .input2		(muxB_EQsrc),
     .result		(Branch_Taken)
 );
 
@@ -183,19 +199,19 @@ MUX_2x32bit MUX_ALUSrc(
     .data_out   (mux_ALUSrc)
 );
 
-MUX_3x32bit MUX_A(    
+MUX_3x32bit MUX_A_ALU(    
     .data0_in	(Rs_Data_EX),
     .data1_in	(mux_MemtoReg),
     .data2_in	(ALUResult_MEM),
-    .select		(ForwardA),
+    .select		(ForwardA_ALU),
     .data_out	(muxA_ALUsrc)
 );
 
-MUX_3x32bit MUX_B(    
+MUX_3x32bit MUX_B_ALU(    
     .data0_in	(Rt_Data_EX),
     .data1_in	(mux_MemtoReg),
     .data2_in	(ALUResult_MEM),
-    .select		(ForwardB),
+    .select		(ForwardB_ALU),
     .data_out	(muxB_ALUsrc)
 );
 
@@ -273,30 +289,31 @@ MUX_2x32bit MUX_MemtoReg(
 // Forwarding
 
 Forwarding Forwarding(
+    .IfIdRegRs (Instr_ID[25:21]),
+    .IfIdRegRt (Instr_ID[20:16]),
     .IdExRegRs		(Instr_EX[25:21]),
     .IdExRegRt		(Instr_EX[20:16]),
     .ExMemRegWrite	(RegWrite_MEM),
     .ExMemRegRd		(mux_RegDST_MEM),
     .MemWbRegWrite	(RegWrite_WB),
     .MemWbRegRd		(mux_RegDST_WB),
-    .ForwardA		(ForwardA),	
-    .ForwardB		(ForwardB)
+    .Branch (Branch),
+    .ForwardA_ALU (ForwardA_ALU),	
+    .ForwardB_ALU (ForwardB_ALU), 
+    .ForwardA_EQ (ForwardA_EQ),
+    .ForwardB_EQ (ForwardB_EQ)
 );
-
 
 // Hazard Detection
 
 Hazard_Detection Hazard_Detection(
     .IFIDRegRs		(Instr_ID[25:21]),
     .IFIDRegRt		(Instr_ID[20:16]),
-    .IDEXRegRt		(Instr_EX[20:16]),
     .IDEXMemRead	(MemRead_EX),
     .IDEXRegDST (mux_RegDST_EX),
     .Branch (Ctrl_Code[8]),
-    .PCWrite		(PCWrite),
-    .IFIDWrite		(IFIDWrite),
+    .IDEXRegWrite (RegWrite_EX),
     .Stall			(Stall)
-
 );
 
 endmodule
